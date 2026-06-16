@@ -1,0 +1,65 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+  html {
+    background-color: #0a0a0a;
+    color: #f0f0f0;
+    font-family: "Inter", sans-serif;
+  }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background-color: #0a0a0a;
+  }
+  ::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #141414;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #333;
+    border-radius: 2px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #f5c518;
+  }
+}
+
+@layer components {
+  .rank-badge {
+    @apply flex items-center justify-center w-9 h-9 border-2 border-yellow-primary text-yellow-primary font-display font-bold text-sm shrink-0;
+  }
+
+  .trend-card {
+    @apply bg-bg-card border border-bg-border rounded-none p-4 cursor-pointer transition-all duration-200
+           hover:border-yellow-primary hover:bg-bg-elevated relative;
+  }
+
+  .trend-card::before {
+    content: "";
+    @apply absolute left-0 top-0 bottom-0 w-0 bg-yellow-primary transition-all duration-200;
+  }
+
+  .trend-card:hover::before {
+    @apply w-0.5;
+  }
+
+  .section-label {
+    @apply text-xs font-display font-semibold tracking-widest uppercase text-text-secondary;
+  }
+
+  .score-bar-track {
+    @apply h-0.5 bg-bg-border rounded-full overflow-hidden;
+  }
+
+  .score-bar-fill {
+    @apply h-full bg-yellow-primary rounded-full transition-all duration-700;
+  }
+}
