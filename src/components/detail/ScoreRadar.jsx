@@ -4,7 +4,7 @@ const AXES = [
   { key: "influence_score", label: "영향력" },
   { key: "recency_score", label: "최신성" },
   { key: "diversity_score", label: "출처 다양성" },
-  { key: "growth_score", label: "급상승" },
+  { key: "trend_momentum_score", label: "급상승" },
 ];
 
 const CX = 160;
