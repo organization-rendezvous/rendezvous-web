@@ -5,22 +5,34 @@ async function request(path, options = {}) {
     headers: { "Content-Type": "application/json" },
     ...options,
   });
+
   if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
+    let err = {};
+    try {
+      err = await res.json();
+    } catch {}
+
     throw new Error(err?.error?.message || `HTTP ${res.status}`);
   }
+
   return res.json();
 }
 
 export const api = {
+  /* -----------------------
+   * health
+   * ----------------------*/
   health: () => request("/health"),
 
+  /* -----------------------
+   * trends
+   * ----------------------*/
   startAnalysis: (params = {}) =>
     request("/trends/analyze", {
       method: "POST",
       body: JSON.stringify({
         user_id: "personal-user",
-        topics: ["개발", "AI", "문화/생활", "사회", "국제"],
+        topics: ["기술", "AI", "개발도구"],
         period: "24h",
         result_limit: 5,
         sources: ["rss", "official_blog", "news"],
@@ -29,18 +41,46 @@ export const api = {
     }),
 
   getJobStatus: (jobId) => request(`/trends/jobs/${jobId}`),
+
   getJobResult: (jobId) => request(`/trends/jobs/${jobId}/result`),
+
   getLatest: (userId = "personal-user") =>
     request(`/trends/latest?user_id=${userId}`).catch((e) => {
-      if (e.message.includes("404") || e.message.includes("NOT_FOUND"))
+      if (e.message.includes("404") || e.message.includes("NOT_FOUND")) {
         return null;
+      }
       throw e;
     }),
 
   getTrend: (trendId) => request(`/trends/${trendId}`),
 
+  /* -----------------------
+   * settings (GENERAL)
+   * ----------------------*/
   getSettings: (userId = "personal-user") =>
     request(`/settings?user_id=${userId}`),
+
   saveSettings: (settings) =>
-    request("/settings", { method: "PUT", body: JSON.stringify(settings) }),
+    request("/settings", {
+      method: "PUT",
+      body: JSON.stringify(settings),
+    }),
+
+  /* -----------------------
+   * MD SYSTEM
+   * ----------------------*/
+  mdExport: (userId, payload) =>
+    request(`/md/export?user_id=${userId}`, {
+      method: "POST",
+      body: JSON.stringify(payload),
+    }),
+
+  getMdSettings: (userId) => request(`/md/${userId}`),
+
+  saveMdSettings: async (userId, settings) => {
+    return await request(`/md/${userId}`, {
+      method: "POST",
+      body: JSON.stringify(settings),
+    });
+  },
 };
