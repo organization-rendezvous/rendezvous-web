@@ -8,6 +8,7 @@ import { AnalysisProgress } from "./components/analysis/AnalysisProgress";
 import { TrendDetail } from "./components/detail/TrendDetail";
 import { SettingsPanel } from "./components/settings/SettingsPanel";
 import { MdPage } from "./components/md/MdPage";
+import { WeatherPage } from "./components/weather/WeatherPage";
 import { MdSettingsModal } from "./components/md/MdSettingsModal";
 import { useAnalysis } from "./hooks/useAnalysis";
 import { api } from "./api/client";
@@ -140,6 +141,7 @@ export default function App() {
         )}
 
         {page === "md" && <MdPage mdSettings={mdSettings} />}
+        {page === "weather" && <WeatherPage />}
       </main>
 
       {showTrendSettings && (

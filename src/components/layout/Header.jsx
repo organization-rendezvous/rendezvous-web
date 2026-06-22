@@ -16,6 +16,7 @@ export function Header({ page, onNavigate, onSettings }) {
   const NAV = [
     { id: "trend", label: "트렌드" },
     { id: "md", label: "MD 생성" },
+    { id: "weather", label: "날씨" },
   ];
 
   return (
