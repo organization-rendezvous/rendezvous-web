@@ -19,6 +19,7 @@ async function request(path, options = {}) {
 }
 
 export const api = {
+  _request: request,
   /* -----------------------
    * health
    * ----------------------*/
