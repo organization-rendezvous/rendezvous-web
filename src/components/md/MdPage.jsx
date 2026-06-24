@@ -1,4 +1,4 @@
-import { useMdExport } from "../../hooks/useMdExport";
+import { useMdExport } from "./hooks/useMdExport";
 
 export function MdPage({ mdSettings }) {
   const { phase, fileName, downloadUrl, error, startExport, reset } =
@@ -7,7 +7,6 @@ export function MdPage({ mdSettings }) {
   const downloadHref = downloadUrl ?? `/md/download/${fileName}`;
 
   const handleExport = () => {
-
     startExport({
       enabled_topics: mdSettings.sections ?? [],
       section_order: mdSettings.sections ?? [],
