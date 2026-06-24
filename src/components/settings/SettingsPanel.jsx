@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { api } from "../../api/client";
+import { api } from "../../api/index";
 
 const TOPIC_OPTIONS = ["개발", "AI", "문화/생활", "사회", "국제"];
 const PERIOD_OPTIONS = [
@@ -16,7 +16,7 @@ export function SettingsPanel({ onClose, onSaved }) {
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    api
+    api.settings
       .getSettings()
       .then(setSettings)
       .catch(() => {});
@@ -54,7 +54,7 @@ export function SettingsPanel({ onClose, onSaved }) {
   const save = async () => {
     setSaving(true);
     try {
-      await api.saveSettings(settings);
+      await api.settings.saveSettings(settings);
       onSaved?.();
       onClose();
     } catch (e) {

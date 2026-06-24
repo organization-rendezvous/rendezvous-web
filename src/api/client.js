@@ -1,87 +1,89 @@
-const API_BASE = "http://127.0.0.1:8000/api";
+//보관용
 
-async function request(path, options = {}) {
-  const res = await fetch(`${API_BASE}${path}`, {
-    headers: { "Content-Type": "application/json" },
-    ...options,
-  });
+// const API_BASE = "http://127.0.0.1:8000/api";
 
-  if (!res.ok) {
-    let err = {};
-    try {
-      err = await res.json();
-    } catch {}
+// async function request(path, options = {}) {
+//   const res = await fetch(`${API_BASE}${path}`, {
+//     headers: { "Content-Type": "application/json" },
+//     ...options,
+//   });
 
-    throw new Error(err?.error?.message || `HTTP ${res.status}`);
-  }
+//   if (!res.ok) {
+//     let err = {};
+//     try {
+//       err = await res.json();
+//     } catch {}
 
-  return res.json();
-}
+//     throw new Error(err?.error?.message || `HTTP ${res.status}`);
+//   }
 
-export const api = {
-  _request: request,
-  /* -----------------------
-   * health
-   * ----------------------*/
-  health: () => request("/health"),
+//   return res.json();
+// }
 
-  /* -----------------------
-   * trends
-   * ----------------------*/
-  startAnalysis: (params = {}) =>
-    request("/trends/analyze", {
-      method: "POST",
-      body: JSON.stringify({
-        user_id: "personal-user",
-        topics: ["기술", "AI", "개발도구"],
-        period: "24h",
-        result_limit: 5,
-        sources: ["rss", "official_blog", "news"],
-        ...params,
-      }),
-    }),
+// export const api = {
+//   _request: request,
+//   /* -----------------------
+//    * health
+//    * ----------------------*/
+//   health: () => request("/health"),
 
-  getJobStatus: (jobId) => request(`/trends/jobs/${jobId}`),
+//   /* -----------------------
+//    * trends
+//    * ----------------------*/
+//   startAnalysis: (params = {}) =>
+//     request("/trends/analyze", {
+//       method: "POST",
+//       body: JSON.stringify({
+//         user_id: "personal-user",
+//         topics: ["기술", "AI", "개발도구"],
+//         period: "24h",
+//         result_limit: 5,
+//         sources: ["rss", "official_blog", "news"],
+//         ...params,
+//       }),
+//     }),
 
-  getJobResult: (jobId) => request(`/trends/jobs/${jobId}/result`),
+//   getJobStatus: (jobId) => request(`/trends/jobs/${jobId}`),
 
-  getLatest: (userId = "personal-user") =>
-    request(`/trends/latest?user_id=${userId}`).catch((e) => {
-      if (e.message.includes("404") || e.message.includes("NOT_FOUND")) {
-        return null;
-      }
-      throw e;
-    }),
+//   getJobResult: (jobId) => request(`/trends/jobs/${jobId}/result`),
 
-  getTrend: (trendId) => request(`/trends/${trendId}`),
+//   getLatest: (userId = "personal-user") =>
+//     request(`/trends/latest?user_id=${userId}`).catch((e) => {
+//       if (e.message.includes("404") || e.message.includes("NOT_FOUND")) {
+//         return null;
+//       }
+//       throw e;
+//     }),
 
-  /* -----------------------
-   * settings (GENERAL)
-   * ----------------------*/
-  getSettings: (userId = "personal-user") =>
-    request(`/settings?user_id=${userId}`),
+//   getTrend: (trendId) => request(`/trends/${trendId}`),
 
-  saveSettings: (settings) =>
-    request("/settings", {
-      method: "PUT",
-      body: JSON.stringify(settings),
-    }),
+//   /* -----------------------
+//    * settings (GENERAL)
+//    * ----------------------*/
+//   getSettings: (userId = "personal-user") =>
+//     request(`/settings?user_id=${userId}`),
 
-  /* -----------------------
-   * MD SYSTEM
-   * ----------------------*/
-  mdExport: (userId, payload) =>
-    request(`/md/export?user_id=${userId}`, {
-      method: "POST",
-      body: JSON.stringify(payload),
-    }),
+//   saveSettings: (settings) =>
+//     request("/settings", {
+//       method: "PUT",
+//       body: JSON.stringify(settings),
+//     }),
 
-  getMdSettings: (userId) => request(`/md/${userId}`),
+//   /* -----------------------
+//    * MD SYSTEM
+//    * ----------------------*/
+//   mdExport: (userId, payload) =>
+//     request(`/md/export?user_id=${userId}`, {
+//       method: "POST",
+//       body: JSON.stringify(payload),
+//     }),
 
-  saveMdSettings: async (userId, settings) => {
-    return await request(`/md/${userId}`, {
-      method: "POST",
-      body: JSON.stringify(settings),
-    });
-  },
-};
+//   getMdSettings: (userId) => request(`/md/${userId}`),
+
+//   saveMdSettings: async (userId, settings) => {
+//     return await request(`/md/${userId}`, {
+//       method: "POST",
+//       body: JSON.stringify(settings),
+//     });
+//   },
+// };

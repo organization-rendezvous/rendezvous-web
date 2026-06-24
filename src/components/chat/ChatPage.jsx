@@ -1,32 +1,10 @@
 import { useState, useEffect, useCallback } from "react";
-import { api } from "../../api/client";
+import { api } from "../../api/index";
 import { toast } from "react-toastify";
 
 import Sidebar from "./Sidebar";
 import ChatRoom from "./ChatRoom";
 import ChatHome from "./ChatHome";
-
-export const chatApi = {
-  getSessions: () => api._request("/chat/sessions"),
-  createSession: () =>
-    api._request("/chat/sessions", {
-      method: "POST",
-      body: JSON.stringify({ title: null }),
-    }),
-  getSession: (id) => api._request(`/chat/sessions/${id}`),
-  sendMessage: (id, message) =>
-    api._request(`/chat/sessions/${id}/messages`, {
-      method: "POST",
-      body: JSON.stringify({ message }),
-    }),
-  updateTitle: (id, title) =>
-    api._request(`/chat/sessions/${id}`, {
-      method: "PATCH",
-      body: JSON.stringify({ title }),
-    }),
-  deleteSession: (id) =>
-    api._request(`/chat/sessions/${id}`, { method: "DELETE" }),
-};
 
 export function ChatPage() {
   const [sessions, setSessions] = useState([]);
@@ -35,14 +13,14 @@ export function ChatPage() {
   const [isNewSession, setIsNewSession] = useState(false); // ← 추가
 
   useEffect(() => {
-    chatApi
+    api.chat
       .getSessions()
       .then((data) => setSessions(data.sessions ?? []))
       .catch(() => {});
   }, []);
 
   const refreshSessions = useCallback(() => {
-    chatApi
+    api.chat
       .getSessions()
       .then((data) => setSessions(data.sessions ?? []))
       .catch(() => {});
@@ -55,7 +33,7 @@ export function ChatPage() {
 
   const handleHomeMessage = async (text) => {
     try {
-      const session = await chatApi.createSession();
+      const session = await api.chat.createSession();
       setSessions((prev) => [session, ...prev]);
       setPendingMessage(text);
       setIsNewSession(true); // ← 새 세션 표시
@@ -67,7 +45,7 @@ export function ChatPage() {
 
   const handleDelete = async (id) => {
     try {
-      await chatApi.deleteSession(id);
+      await api.chat.deleteSession(id);
       setSessions((prev) => prev.filter((s) => s.session_id !== id));
       if (activeId === id) setActiveId(null);
     } catch {
@@ -77,7 +55,7 @@ export function ChatPage() {
 
   const handleRename = async (id, title) => {
     try {
-      await chatApi.updateTitle(id, title);
+      await api.chat.updateTitle(id, title);
       setSessions((prev) =>
         prev.map((s) => (s.session_id === id ? { ...s, title } : s)),
       );
@@ -138,8 +116,8 @@ export function ChatPage() {
               initialMessage={pendingMessage}
               onInitialMessageSent={() => setPendingMessage(null)}
               onSessionUpdate={handleSessionUpdate}
-              chatApi={chatApi}
-              isNew={isNewSession} // ← 전달
+              chatApi={api.chat}
+              isNew={isNewSession}
             />
           ) : (
             <ChatHome onSend={handleHomeMessage} />

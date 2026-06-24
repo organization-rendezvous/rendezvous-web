@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from "react";
-import { api } from "../api/client";
+import { api } from "../api/index";
 
 export function useAnalysis() {
   const [state, setState] = useState({
@@ -30,7 +30,7 @@ export function useAnalysis() {
   const loadLatest = useCallback(async () => {
     setState((s) => ({ ...s, phase: "loading" }));
     try {
-      const result = await api.getLatest();
+      const result = await api.trends.getLatest();
       if (result) {
         setState({
           phase: "done",
@@ -72,7 +72,7 @@ export function useAnalysis() {
     });
 
     try {
-      const { job_id } = await api.startAnalysis(settings);
+      const { job_id } = await api.trends.startAnalysis(settings);
       if (cancelledRef.current) return;
 
       setState((s) => ({ ...s, jobId: job_id }));
@@ -82,7 +82,7 @@ export function useAnalysis() {
         if (cancelledRef.current) return;
 
         try {
-          const status = await api.getJobStatus(job_id);
+          const status = await api.trends.getJobStatus(job_id);
           if (cancelledRef.current) return;
 
           setState((s) => ({ ...s, jobStatus: status }));
@@ -92,7 +92,7 @@ export function useAnalysis() {
           ) {
             // 완료 → 결과 조회 1회, 폴링 종료
             if (status.status !== "failed") {
-              const result = await api.getJobResult(job_id);
+              const result = await api.trends.getJobResult(job_id);
               if (!cancelledRef.current) {
                 setState({
                   phase: "done",

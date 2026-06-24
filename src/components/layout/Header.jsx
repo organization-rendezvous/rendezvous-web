@@ -15,6 +15,7 @@ const GearIcon = () => (
 export function Header({ page, onNavigate, onSettings }) {
   const NAV = [
     { id: "trend", label: "트렌드" },
+    { id: "archive", label: "보관함" },
     { id: "md", label: "MD 생성" },
     { id: "weather", label: "날씨" },
     { id: "chat", label: "Chat" },
@@ -23,12 +24,10 @@ export function Header({ page, onNavigate, onSettings }) {
   return (
     <header className="sticky top-0 z-50 border-b bg-bg-base/95 backdrop-blur-sm border-bg-border">
       <div className="flex items-center justify-between px-6 py-4">
-        {/* 로고 */}
         <span className="text-xl font-bold tracking-tight font-display text-text-primary">
           RENDE<span className="text-yellow-primary">ZVOUS</span>
         </span>
 
-        {/* 탭 메뉴 */}
         <nav className="flex items-center gap-1">
           {NAV.map((item) => (
             <button
@@ -45,7 +44,6 @@ export function Header({ page, onNavigate, onSettings }) {
           ))}
         </nav>
 
-        {/* 톱니바퀴 — 항상 표시, 페이지별로 다른 동작 */}
         <div className="w-[72px] flex justify-end">
           <button
             onClick={onSettings}

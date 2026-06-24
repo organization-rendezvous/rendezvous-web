@@ -1,106 +1,72 @@
 import { useState, useEffect } from "react";
-import { api } from "../../api/client";
+import { api } from "../../api/index";
 import { ScoreBar } from "./ScoreBar";
 import { ScoreRadar } from "./ScoreRadar";
 import { LinkCard } from "./LinkCard";
 
 const SCORE_LABELS = {
   mention_score: "언급량",
-  trend_momentum_score: "급상승", // growth_score → trend_momentum_score
+  growth_score: "급상승",
   diversity_score: "출처 다양성",
   influence_score: "영향력",
   recency_score: "최신성",
   ai_importance_score: "AI 중요도",
 };
 
-// 순위 히스토리 미니 그래프
-function RankHistoryChart({ history }) {
-  if (!history || history.length === 0) return null;
+function BookmarkButton({ trendId, title }) {
+  const [isArchived, setIsArchived] = useState(false);
+  const [archiveId, setArchiveId] = useState(null);
+  const [loading, setLoading] = useState(false);
 
-  const maxRank = Math.max(...history.map((h) => h.rank));
-  const chartHeight = 60;
-  const chartWidth = 200;
-  const padX = 12;
-  const padY = 8;
+  useEffect(() => {
+    if (!title) return;
+    api.archive
+      .archiveCheck(title)
+      .then((data) => {
+        setIsArchived(data.is_archived);
+        setArchiveId(data.archive_id);
+      })
+      .catch(() => {});
+  }, [title]);
 
-  const innerW = chartWidth - padX * 2;
-  const innerH = chartHeight - padY * 2;
-
-  // 점 좌표 계산 (rank가 낮을수록 위)
-  const points = history.map((h, i) => ({
-    x:
-      padX +
-      (history.length === 1 ? innerW / 2 : (i / (history.length - 1)) * innerW),
-    y: padY + ((h.rank - 1) / Math.max(maxRank - 1, 1)) * innerH,
-    ...h,
-  }));
-
-  const pathD = points
-    .map((p, i) => `${i === 0 ? "M" : "L"} ${p.x} ${p.y}`)
-    .join(" ");
-
-  // 면적 채우기용 path
-  const areaD =
-    pathD +
-    ` L ${points[points.length - 1].x} ${chartHeight - padY} L ${points[0].x} ${chartHeight - padY} Z`;
+  const toggle = async () => {
+    setLoading(true);
+    try {
+      if (isArchived && archiveId) {
+        await api.archive.archiveDelete(archiveId);
+        setIsArchived(false);
+        setArchiveId(null);
+      } else {
+        const res = await api.archive.archiveSave(trendId);
+        setIsArchived(true);
+        setArchiveId(res.archive_id);
+      }
+    } catch {}
+    setLoading(false);
+  };
 
   return (
-    <div className="mt-3">
-      <p className="mb-2 section-label">순위 변화</p>
-      <div className="p-4 border bg-bg-card border-bg-border">
-        <svg
-          width={chartWidth}
-          height={chartHeight}
-          viewBox={`0 0 ${chartWidth} ${chartHeight}`}
-          className="overflow-visible"
-        >
-          {/* 면적 */}
-          <path d={areaD} fill="rgba(234,179,8,0.08)" />
-          {/* 선 */}
-          <path
-            d={pathD}
-            fill="none"
-            stroke="rgb(234,179,8)"
-            strokeWidth="1.5"
-            strokeLinejoin="round"
-          />
-          {/* 점 + 툴팁 */}
-          {points.map((p, i) => (
-            <g key={i}>
-              <circle cx={p.x} cy={p.y} r="3" fill="rgb(234,179,8)" />
-              {/* 날짜 레이블 (첫/마지막만) */}
-              {(i === 0 || i === points.length - 1) && (
-                <text
-                  x={p.x}
-                  y={chartHeight}
-                  textAnchor="middle"
-                  fontSize="8"
-                  fill="rgb(120,120,120)"
-                >
-                  {p.trend_date?.slice(5)}
-                </text>
-              )}
-              {/* 순위 레이블 */}
-              <text
-                x={p.x}
-                y={p.y - 6}
-                textAnchor="middle"
-                fontSize="9"
-                fill="rgb(234,179,8)"
-                fontWeight="bold"
-              >
-                #{p.rank}
-              </text>
-            </g>
-          ))}
-        </svg>
-        {history.length === 1 && (
-          <p className="text-[10px] text-text-muted mt-1">
-            분석 1회 — 데이터가 쌓이면 순위 변화가 표시됩니다
-          </p>
-        )}
-      </div>
-    </div>
+    <button
+      onClick={toggle}
+      disabled={loading}
+      title={isArchived ? "보관 해제" : "보관하기"}
+      className={`p-2 transition-colors duration-150 ${
+        isArchived
+          ? "text-yellow-primary"
+          : "text-text-muted hover:text-yellow-primary"
+      } disabled:opacity-40`}
+    >
+      <svg
+        width="34"
+        height="34"
+        viewBox="0 0 24 24"
+        fill={isArchived ? "currentColor" : "none"}
+        stroke="currentColor"
+        strokeWidth="1.5"
+      >
+        <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
+      </svg>
+    </button>
   );
 }
 
@@ -111,7 +77,7 @@ export function TrendDetail({ trendId, onBack }) {
 
   useEffect(() => {
     setLoading(true);
-    api
+    api.trends
       .getTrend(trendId)
       .then(setDetail)
       .catch((e) => setError(e.message))
@@ -144,10 +110,6 @@ export function TrendDetail({ trendId, onBack }) {
     );
   }
 
-  // is_rising: API에 없으면 trend_momentum_score로 판단
-  const isRising =
-    detail.is_rising ?? (detail.scores?.trend_momentum_score ?? 0) >= 60;
-
   return (
     <div className="max-w-2xl px-6 py-6 mx-auto animate-slide-up">
       {/* Back */}
@@ -170,44 +132,32 @@ export function TrendDetail({ trendId, onBack }) {
 
       {/* Header */}
       <div className="flex items-start gap-4 mb-8">
-        <div className="text-lg rank-badge w-11 h-11">{detail.rank}</div>
-        <div>
-          <div className="flex items-center gap-2 mb-1">
-            <span className="text-xs font-display text-text-muted">
-              {detail.topic}
+        <div className="flex flex-col items-center gap-1">
+          <div className="text-lg rank-badge w-11 h-11">{detail.rank}</div>
+
+          {detail.is_rising && (
+            <span className="text-[10px] font-display font-bold px-1.5 py-0.5 bg-yellow-muted text-yellow-primary border border-yellow-primary/30 whitespace-nowrap mt-6">
+              ↑ 급상승
             </span>
-            {isRising && (
-              <span className="text-[10px] font-display font-bold px-1.5 py-0.5 bg-yellow-muted text-yellow-primary border border-yellow-primary/30">
-                ↑ 급상승
-              </span>
-            )}
-          </div>
+          )}
+        </div>
+        <div className="flex-1">
           <h1 className="text-2xl font-bold leading-tight font-display text-text-primary">
             {detail.title}
           </h1>
-          <div className="flex items-center gap-3 mt-2">
-            <div className="flex items-center gap-1">
-              <span className="text-lg font-bold text-yellow-primary font-display">
-                {detail.score.toFixed(1)}
-              </span>
-              <span className="text-xs text-text-muted">점</span>
-            </div>
-            {/* 모멘텀 점수 인라인 표시 */}
-            {detail.scores?.trend_momentum_score != null && (
-              <div className="flex items-center gap-1 text-[10px] text-text-muted font-display">
-                <span
-                  className={
-                    detail.scores.trend_momentum_score >= 60
-                      ? "text-yellow-primary"
-                      : ""
-                  }
-                >
-                  ↑ 모멘텀 {detail.scores.trend_momentum_score.toFixed(0)}
-                </span>
-              </div>
-            )}
+
+          <div className="flex items-center gap-1 mt-2">
+            <span className="mr-2 text-sm font-semibold font-display text-yellow-primary">
+              {detail.topic}
+            </span>
+
+            <span className="text-lg font-bold text-yellow-primary font-display">
+              {detail.score.toFixed(1)}
+            </span>
           </div>
         </div>
+        {/* 보관 버튼 */}
+        <BookmarkButton trendId={trendId} title={detail.title} />
       </div>
 
       {/* Summary */}
@@ -274,9 +224,6 @@ export function TrendDetail({ trendId, onBack }) {
               </div>
             </div>
           </div>
-
-          {/* 순위 히스토리 그래프 */}
-          <RankHistoryChart history={detail.rank_history} />
         </section>
       )}
 

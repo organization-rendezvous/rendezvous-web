@@ -1,4 +1,4 @@
-import { api } from "../../api/client";
+import { api } from "../../api/index";
 
 const SECTION_OPTIONS = ["사건사고", "개발", "AI", "사회", "국제", "문화/생활"];
 
@@ -39,7 +39,7 @@ export function MdSettingsModal({ settings, onChange, onClose }) {
       save_path: savePath ?? "~/Downloads",
     };
 
-    const res = await api.saveMdSettings("personal-user", payload);
+    const res = await api.md.saveMdSettings("personal-user", payload);
     onClose();
   };
 

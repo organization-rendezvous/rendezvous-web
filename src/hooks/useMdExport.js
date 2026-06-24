@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { api } from "../api/client";
+import { api } from "../api/index";
 
 export function useMdExport() {
   const [state, setState] = useState({
@@ -19,10 +19,10 @@ export function useMdExport() {
 
     try {
       // 1. settings 먼저 저장
-      await api.saveMdSettings("personal-user", settings);
+      await api.md.saveMdSettings("personal-user", settings);
 
       // 2. export 실행
-      const data = await api.mdExport("personal-user", settings);
+      const data = await api.md.mdExport("personal-user", settings);
 
       setState({
         phase: "ready",

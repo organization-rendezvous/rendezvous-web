@@ -10,9 +10,11 @@ import { SettingsPanel } from "./components/settings/SettingsPanel";
 import { MdPage } from "./components/md/MdPage";
 import { WeatherPage } from "./components/weather/WeatherPage";
 import { ChatPage } from "./components/chat/ChatPage";
+import { ArchivePage } from "./components/archive/ArchivePage";
+import { ArchiveDetailPage } from "./components/archive/ArchiveDetailPage";
 import { MdSettingsModal } from "./components/md/MdSettingsModal";
 import { useAnalysis } from "./hooks/useAnalysis";
-import { api } from "./api/client";
+import { api } from "./api/index";
 
 const TODAY = new Date().toISOString().slice(0, 10);
 
@@ -27,6 +29,7 @@ export default function App() {
     useAnalysis();
   const [page, setPage] = useState("trend");
   const [selectedTrendId, setSelectedTrendId] = useState(null);
+  const [selectedArchiveId, setSelectedArchiveId] = useState(null);
   const [settings, setSettings] = useState(null);
   const [showTrendSettings, setShowTrendSettings] = useState(false);
   const [showMdSettings, setShowMdSettings] = useState(false);
@@ -38,14 +41,14 @@ export default function App() {
   useEffect(() => {
     loadLatest();
 
-    api
+    api.settings
       .getSettings()
       .then(setSettings)
       .catch(() => {
         toast.error("세팅을 불러오는데에 실패하였습니다");
       });
 
-    api
+    api.md
       .getMdSettings("personal-user")
       .then((data) => {
         if (!data) return;
@@ -85,6 +88,8 @@ export default function App() {
 
   const handleNavigate = (target) => {
     if (target === "trend") setSelectedTrendId(null);
+    if (target === "archive") setSelectedArchiveId(null);
+
     setPage(target);
   };
 
@@ -141,6 +146,18 @@ export default function App() {
           </>
         )}
 
+        {page === "archive" &&
+          (selectedArchiveId ? (
+            <ArchiveDetailPage
+              archiveId={selectedArchiveId}
+              onBack={() => setSelectedArchiveId(null)}
+            />
+          ) : (
+            <ArchivePage
+              onSelectArchive={(item) => setSelectedArchiveId(item.archive_id)}
+            />
+          ))}
+
         {page === "md" && <MdPage mdSettings={mdSettings} />}
         {page === "weather" && <WeatherPage />}
         {page === "chat" && <ChatPage />}
@@ -150,7 +167,7 @@ export default function App() {
         <SettingsPanel
           onClose={() => setShowTrendSettings(false)}
           onSaved={() => {
-            api
+            api.settings
               .getSettings()
               .then(setSettings)
               .catch(() => {});
