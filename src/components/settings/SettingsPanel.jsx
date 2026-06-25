@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { api } from "../../api/index";
 
-const TOPIC_OPTIONS = ["개발", "AI", "문화/생활", "사회", "국제"];
+const TOPIC_OPTIONS = ["개발", "AI", "문화/생활", "사회", "국제", "사건사고"];
 const PERIOD_OPTIONS = [
   { value: "24h", label: "최근 24시간" },
   { value: "7d", label: "최근 7일" },
@@ -124,21 +124,6 @@ export function SettingsPanel({ onClose, onSaved }) {
               {t} ✕
             </Chip>
           ))}
-          <div className="flex gap-2 mt-3">
-            <input
-              value={customTopic}
-              onChange={(e) => setCustomTopic(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && addCustomTopic()}
-              placeholder="직접 입력..."
-              className="flex-1 bg-bg-card border border-bg-border px-3 py-1.5 text-xs text-text-primary placeholder:text-text-muted outline-none focus:border-yellow-primary/50"
-            />
-            <button
-              onClick={addCustomTopic}
-              className="text-xs px-3 py-1.5 border border-bg-border text-text-secondary hover:border-yellow-primary/40 hover:text-yellow-primary transition-colors"
-            >
-              추가
-            </button>
-          </div>
         </section>
 
         {/* Period */}
